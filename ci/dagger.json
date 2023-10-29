@@ -1,0 +1,9 @@
+{
+  "name": "ci",
+  "sdk": "go",
+  "root": "..",
+  "exclude": [
+    ".devenv",
+    ".direnv"
+  ]
+}
