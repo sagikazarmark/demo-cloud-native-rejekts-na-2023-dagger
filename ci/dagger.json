@@ -1,9 +1,12 @@
 {
   "name": "ci",
-  "sdk": "go",
   "root": "..",
+  "sdk": "go",
   "exclude": [
     ".devenv",
     ".direnv"
+  ],
+  "dependencies": [
+    "github.com/jpadams/daggerverse/trivy@d444ed56169d3737c018ed16e2d6bab92886f951"
   ]
 }
