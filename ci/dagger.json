@@ -7,6 +7,6 @@
     ".direnv"
   ],
   "dependencies": [
-    "github.com/jpadams/daggerverse/trivy@d444ed56169d3737c018ed16e2d6bab92886f951"
+    "github.com/jpadams/daggerverse/trivy@08bcbd1bd59467cabc8b0d1eebaadeea69314fa9"
   ]
 }

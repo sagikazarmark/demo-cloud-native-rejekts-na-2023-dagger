@@ -16,8 +16,10 @@ const (
 type Ci struct{}
 
 // Run the entire CI pipeline
-func (m *Ci) CI(ctx context.Context) error {
+func (m *Ci) CI(ctx context.Context, githubRelease Optional[bool], version Optional[string], githubActor Optional[string], githubToken Optional[*Secret]) error {
 	var group errgroup.Group
+
+	appVersion := version.GetOr("latest")
 
 	// Build
 	var app *Container
@@ -27,7 +29,7 @@ func (m *Ci) CI(ctx context.Context) error {
 		group.Go(func() error {
 			var err error
 
-			app, err = build(dag).Sync(ctx)
+			app, err = build(dag, appVersion).Sync(ctx)
 
 			return err
 		})
@@ -61,16 +63,29 @@ func (m *Ci) CI(ctx context.Context) error {
 	}
 
 	// TODO: remove this from the initial version and add back later
-	scanOutput, err := dag.Trivy().ScanContainer(ctx, app)
+	_, err = dag.Trivy().ScanContainer(ctx, app, TrivyScanContainerOpts{
+		Severity: "HIGH,CRITICAL",
+		ExitCode: 1,
+	})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(scanOutput)
-
 	// If this is a release, publish and deploy the container image
-	if false {
-		ref, err := app.Publish(ctx, "registry.example.com/app")
+	if githubRelease.GetOr(false) {
+		username, ok := githubActor.Get()
+		if !ok {
+			return fmt.Errorf("github actor not set")
+		}
+
+		token, ok := githubToken.Get()
+		if !ok {
+			return fmt.Errorf("github token not set")
+		}
+
+		const imageRepo = "ghcr.io/sagikazarmark/demo-cloud-native-rejekts-na-2023-dagger"
+
+		ref, err := app.WithRegistryAuth("ghcr.io", username, token).Publish(ctx, fmt.Sprintf("%s:%s", imageRepo, appVersion))
 		if err != nil {
 			return err
 		}
@@ -85,10 +100,10 @@ func (m *Ci) CI(ctx context.Context) error {
 
 // Build the container image
 func (m *Ci) Build() *Container {
-	return build(dag)
+	return build(dag, "latest")
 }
 
-func build(dag *Client) *Container {
+func build(dag *Client, version string) *Container {
 	host := dag.Host()
 
 	binary := dag.Container().
@@ -102,6 +117,7 @@ func build(dag *Client) *Container {
 		WithEnvVariable("CGO_ENABLED", "0").
 		WithEnvVariable("GOOS", "linux").
 		WithEnvVariable("GOARCH", "amd64").
+		WithEnvVariable("VERSION", version).
 		WithExec([]string{"go", "build", "-ldflags", "-X main.version=${VERSION}", "-o", "/usr/local/bin/app", "."}).
 		File("/usr/local/bin/app")
 
@@ -127,7 +143,7 @@ func test(dag *Client) *Container {
 		WithMountedCache("/root/.cache/go-build", dag.CacheVolume("go-build")).
 		WithMountedCache("/go/pkg/mod", dag.CacheVolume("go-mod")).
 		WithMountedDirectory("/src", host.Directory(root(), HostDirectoryOpts{
-			Exclude: []string{".direnv", ".devenv", "api/client/node/node_modules"},
+			Exclude: []string{".direnv", ".devenv"},
 		})).
 		WithWorkdir("/src").
 		WithExec([]string{"go", "test", "-v", "./..."})

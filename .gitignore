@@ -1,3 +1,4 @@
 /.devenv/
 /.direnv/
 /build/
+/.env.local
