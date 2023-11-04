@@ -35,8 +35,7 @@ bin/golangci-lint:
 
 bin/dagger:
 	@mkdir -p bin
-	curl -L https://github.com/dagger/dagger/releases/download/v${DAGGER_VERSION}/dagger_v${DAGGER_VERSION}_${OS}_arm64.tar.gz | tar -zOxf - dagger > ./bin/dagger
-	chmod +x bin/dagger
+	curl -L https://dl.dagger.io/dagger/install.sh | sh
 	@echo ${HELLO}
 
 .PHONY: help
