@@ -6,6 +6,7 @@
 
 ## Development
 
+1. Download Dagger: `make bin/dagger`
 1. Write some code (and tests)
 1. Build the app: `make build`
 1. Run tests: `make test`
