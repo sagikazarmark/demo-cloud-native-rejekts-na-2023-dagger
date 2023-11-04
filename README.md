@@ -7,7 +7,7 @@
 ## Development
 
 1. Write some code (and tests)
+1. Build the app: `make build`
 1. Run tests: `make test`
 1. Run lint: `make lint`
-1. Run the app: `make run`
 1. Commit and push
