@@ -11,6 +11,7 @@ const (
 	goVersion           = "1.21.3"
 	golangciLintVersion = "1.54.2"
 	artifactBaseImage   = "alpine:3.18.4"
+	trivyImageTag       = "0.46.1"
 )
 
 type Ci struct{}
@@ -64,6 +65,15 @@ func (m *Ci) CI(ctx context.Context,
 	}
 
 	err := group.Wait()
+	if err != nil {
+		return err
+	}
+
+	_, err = dag.Trivy().ScanContainer(ctx, app, TrivyScanContainerOpts{
+		TrivyImageTag: trivyImageTag,
+		Severity:      "HIGH,CRITICAL",
+		ExitCode:      1,
+	})
 	if err != nil {
 		return err
 	}

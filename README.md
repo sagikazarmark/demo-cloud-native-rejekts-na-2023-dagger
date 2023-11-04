@@ -11,3 +11,5 @@
 1. Run tests: `make test`
 1. Run lint: `make lint`
 1. Commit and push
+
+**Pro tip:** Use `dagger call ci` to run the entire CI pipeline locally.
