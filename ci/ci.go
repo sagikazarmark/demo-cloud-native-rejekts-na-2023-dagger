@@ -129,8 +129,7 @@ func build(dag *Client, version string) *Container {
 		WithEnvVariable("CGO_ENABLED", "0").
 		WithEnvVariable("GOOS", "linux").
 		WithEnvVariable("GOARCH", "amd64").
-		WithEnvVariable("VERSION", version).
-		WithExec([]string{"go", "build", "-ldflags", "-X main.version=${VERSION}", "-o", "/usr/local/bin/app", "."}).
+		WithExec([]string{"go", "build", "-ldflags", fmt.Sprintf("-X main.version=%s", version), "-o", "/usr/local/bin/app", "."}).
 		File("/usr/local/bin/app")
 
 	return dag.Container(ContainerOpts{
