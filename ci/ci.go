@@ -68,15 +68,6 @@ func (m *Ci) CI(ctx context.Context,
 		return err
 	}
 
-	// TODO: remove this from the initial version and add back later
-	_, err = dag.Trivy().ScanContainer(ctx, app, TrivyScanContainerOpts{
-		Severity: "HIGH,CRITICAL",
-		ExitCode: 1,
-	})
-	if err != nil {
-		return err
-	}
-
 	// If this is a release, publish and deploy the container image
 	if githubRelease.GetOr(false) {
 		username, ok := githubActor.Get()
