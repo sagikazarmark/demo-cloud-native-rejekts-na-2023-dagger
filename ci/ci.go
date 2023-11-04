@@ -16,7 +16,13 @@ const (
 type Ci struct{}
 
 // Run the entire CI pipeline
-func (m *Ci) CI(ctx context.Context, githubRelease Optional[bool], version Optional[string], githubActor Optional[string], githubToken Optional[*Secret]) error {
+func (m *Ci) CI(ctx context.Context,
+	githubRelease Optional[bool],
+	version Optional[string],
+	githubActor Optional[string],
+	githubToken Optional[*Secret],
+	flyToken Optional[*Secret],
+) error {
 	var group errgroup.Group
 
 	appVersion := version.GetOr("latest")
@@ -78,21 +84,27 @@ func (m *Ci) CI(ctx context.Context, githubRelease Optional[bool], version Optio
 			return fmt.Errorf("github actor not set")
 		}
 
-		token, ok := githubToken.Get()
+		password, ok := githubToken.Get()
 		if !ok {
 			return fmt.Errorf("github token not set")
 		}
 
 		const imageRepo = "ghcr.io/sagikazarmark/demo-cloud-native-rejekts-na-2023-dagger"
 
-		ref, err := app.WithRegistryAuth("ghcr.io", username, token).Publish(ctx, fmt.Sprintf("%s:%s", imageRepo, appVersion))
+		ref, err := app.WithRegistryAuth("ghcr.io", username, password).Publish(ctx, fmt.Sprintf("%s:%s", imageRepo, appVersion))
 		if err != nil {
 			return err
 		}
 
-		// Deploy ref
-		// TODO(mark): deploy to Fly.io
-		_ = ref
+		token, ok := flyToken.Get()
+		if !ok {
+			return fmt.Errorf("fly token not set")
+		}
+
+		_, err = dag.Fly().Deploy(ctx, "demo-cloud-native-rejekts-na-2023-dagger", ref, token)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -121,7 +133,9 @@ func build(dag *Client, version string) *Container {
 		WithExec([]string{"go", "build", "-ldflags", "-X main.version=${VERSION}", "-o", "/usr/local/bin/app", "."}).
 		File("/usr/local/bin/app")
 
-	return dag.Container().From(artifactBaseImage).
+	return dag.Container(ContainerOpts{
+		Platform: "linux/amd64",
+	}).From(artifactBaseImage).
 		WithExec([]string{"apk", "add", "--update", "--no-cache", "ca-certificates", "tzdata"}).
 		WithFile("/usr/local/bin/app", binary, ContainerWithFileOpts{
 			Permissions: 0555,

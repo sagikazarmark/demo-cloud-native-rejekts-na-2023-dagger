@@ -24,6 +24,8 @@
 
             packages = with pkgs; [
               golangci-lint
+
+              flyctl
             ] ++ [
               inputs'.dagger.packages.dagger
             ];

@@ -1,0 +1,18 @@
+# fly.toml app configuration file generated for demo-cloud-native-rejekts-na-2023-dagger on 2023-11-04T12:26:18-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "demo-cloud-native-rejekts-na-2023-dagger"
+primary_region = "ord"
+
+[build]
+  image = "ghcr.io/sagikazarmark/demo-cloud-native-rejekts-na-2023-dagger:latest"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
