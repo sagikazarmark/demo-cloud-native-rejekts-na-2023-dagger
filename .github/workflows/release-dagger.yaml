@@ -24,4 +24,3 @@ jobs:
         with:
           args: ci --github-actor ${{ github.actor }} --github-token ${{ github.token }} --github-release --fly-token ${{ secrets.FLY_TOKEN }} --version ${{ github.ref_name }}
           module: ci
-          dagger-flags: ""
