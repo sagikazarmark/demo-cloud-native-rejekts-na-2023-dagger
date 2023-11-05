@@ -6,7 +6,8 @@ OS = $(shell uname | tr A-Z a-z)
 .PHONY: build
 build: ## Build all binaries
 	@mkdir -p build
-	go build -trimpath -o build/app .
+	dagger call build
+	# go build -trimpath -o build/app .
 
 .PHONY: run
 run: build ## Build and run the application
@@ -17,11 +18,11 @@ check: test lint ## Run checks (tests and linters)
 
 .PHONY: test
 test: ## Run tests
-	go test -v ./...
+	dagger call test
 
 .PHONY: lint
 lint: ## Run linter
-	golangci-lint run
+	dagger call lint
 
 # Dependency versions
 GOLANGCI_VERSION ?= 1.52.2
