@@ -7,6 +7,7 @@
     ".direnv"
   ],
   "dependencies": [
+    "github.com/jpadams/daggerverse/trivy@0355be467aa9737c3729e6fcc7d0bda071747f0e",
     "github.com/kpenfound/dagger-modules/fly@1144790feef69cb55ba2369e5a1c45946eacd886"
   ]
 }
