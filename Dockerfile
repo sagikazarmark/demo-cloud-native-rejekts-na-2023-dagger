@@ -23,7 +23,7 @@ ARG VERSION
 RUN go build -ldflags "-X main.version=${VERSION}" -o /usr/local/bin/app .
 
 
-FROM alpine:3.18.4@sha256:eece025e432126ce23f223450a0326fbebde39cdf496a85d8c016293fc851978
+FROM alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
 
 RUN apk add --update --no-cache ca-certificates tzdata
 
